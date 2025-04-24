@@ -64,6 +64,7 @@ function PasswordGenerator() {
     }
   };
 
+
   const deletePassword = async (passId) => {
     try {
       const response = await fetch(`http://localhost:8085/library/${username}?passId=${passId}`, {
@@ -81,6 +82,24 @@ function PasswordGenerator() {
       console.error('Error deleting password:', error);
     }
   };
+
+  const checkPassword = async (password) => {
+     try {
+       const response = await fetch(`http://localhost:8081/api/v1/password/check?password=${password}`, {
+         method: 'POST',
+       });
+
+       if (response.ok) {
+         const msg = await response.text();
+         alert(`Strength of password ${password} is: ${msg}`);
+       } else {
+         const msg = await response.text();
+         alert(`Error deleting password: ${msg}`);
+       }
+     } catch (error) {
+       console.error('Error deleting password:', error);
+     }
+   };
 
   useEffect(() => {
     fetchSavedPasswords();
@@ -159,6 +178,12 @@ function PasswordGenerator() {
                     onClick={() => deletePassword(item.id)}
                   >
                     Delete
+                  </button>
+                  <button
+                    className="delete-button"
+                    onClick={() => checkPassword(item.password_value)}
+                  >
+                    Check
                   </button>
                 </li>
               ))}

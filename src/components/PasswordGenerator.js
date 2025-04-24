@@ -129,8 +129,10 @@ function PasswordGenerator() {
 
           {generatedPassword && (
             <div className="generated-password">
-              <strong>Password:</strong> {generatedPassword}
-              <button type="button" onClick={savePassword}>Save</button>
+              <span className="password-text">
+                <strong>Password:</strong> {generatedPassword}
+              </span>
+              <button className="save-button" type="button" onClick={savePassword}>Save</button>
             </div>
           )}
         </form>

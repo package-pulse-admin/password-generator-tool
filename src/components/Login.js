@@ -18,6 +18,7 @@ function Login() {
     });
 
     if (res.ok) {
+      localStorage.setItem('username', username); // Save username
       navigate('/generate');
     } else {
       setShowError(true);

@@ -10,7 +10,7 @@ function PasswordGenerator() {
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [passwordList, setPasswordList] = useState([]);
 
-  const username = localStorage.getItem('admin'); // Or use context/state
+  const username = localStorage.getItem('username'); // Get saved username
 
   const generatePassword = async () => {
     const params = new URLSearchParams({
@@ -32,7 +32,7 @@ function PasswordGenerator() {
 
   const fetchSavedPasswords = async () => {
     try {
-      const res = await fetch(`http://localhost:8085/library/admin`);
+      const res = await fetch(`http://localhost:8085/library/${username}`); // Dynamic username
       const data = await res.json();
       setPasswordList(data);
     } catch (error) {
@@ -44,7 +44,7 @@ function PasswordGenerator() {
     if (!generatedPassword) return;
 
     try {
-      const response = await fetch(`http://localhost:8085/library/admin`, {
+      const response = await fetch(`http://localhost:8085/library/${username}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -54,7 +54,7 @@ function PasswordGenerator() {
 
       if (response.ok) {
         alert('Password saved!');
-        fetchSavedPasswords(); // Refresh the list
+        fetchSavedPasswords();
       } else {
         const msg = await response.text();
         alert(`Error saving password: ${msg}`);
@@ -66,13 +66,13 @@ function PasswordGenerator() {
 
   const deletePassword = async (passId) => {
     try {
-      const response = await fetch(`http://localhost:8085/library/admin?passId=${passId}`, {
+      const response = await fetch(`http://localhost:8085/library/${username}?passId=${passId}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
         alert('Password deleted successfully!');
-        fetchSavedPasswords(); // Refresh the password list after deletion
+        fetchSavedPasswords();
       } else {
         const msg = await response.text();
         alert(`Error deleting password: ${msg}`);
@@ -89,7 +89,13 @@ function PasswordGenerator() {
   return (
     <div className="generator-wrapper">
       <div className="logout-container">
-        <button className="logout-button" onClick={() => window.location.href = '/'}>
+        <button
+          className="logout-button"
+          onClick={() => {
+            localStorage.removeItem('username'); // Clear on logout
+            window.location.href = '/';
+          }}
+        >
           Logout
         </button>
       </div>
@@ -128,11 +134,10 @@ function PasswordGenerator() {
           <button type="submit">Generate</button>
 
           {generatedPassword && (
-            <div className="generated-password">
-              <span className="password-text">
-                <strong>Password:</strong> {generatedPassword}
-              </span>
-              <button className="save-button" type="button" onClick={savePassword}>Save</button>
+            <div className="generated-password" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+              <strong>Password:</strong>
+              <span style={{ wordBreak: 'break-all' }}>{generatedPassword}</span>
+              <button type="button" onClick={savePassword}>Save</button>
             </div>
           )}
         </form>

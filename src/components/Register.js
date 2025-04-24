@@ -78,7 +78,7 @@ function Register() {
         <button type="submit">SIGN UP</button>
         <p>
           Already have an account?{' '}
-          <span className="link" onClick={() => navigate('/login')}>
+          <span className="link" onClick={() => navigate('/')}>
             Login
           </span>
         </p>

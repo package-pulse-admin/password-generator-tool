@@ -173,18 +173,20 @@ function PasswordGenerator() {
                   <div className="password-text">
                     <strong>Password:</strong> {item.password_value}
                   </div>
-                  <button
-                    className="delete-button"
-                    onClick={() => deletePassword(item.id)}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    className="delete-button"
-                    onClick={() => checkPassword(item.password_value)}
-                  >
-                    Check
-                  </button>
+                  <div className="password-actions">
+                    <button
+                      className="delete-button"
+                      onClick={() => deletePassword(item.id)}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="delete-button"
+                      onClick={() => checkPassword(item.password_value)}
+                    >
+                      Check
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

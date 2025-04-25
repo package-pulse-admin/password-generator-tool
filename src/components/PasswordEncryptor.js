@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './PasswordEncryptor.css';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 function PasswordEncryptor() {
   const [password, setPassword] = useState('');
@@ -11,6 +12,7 @@ function PasswordEncryptor() {
   const [encryptedInput, setEncryptedInput] = useState('');
   const [decryptedOutput, setDecryptedOutput] = useState('');
   const [decryptError, setDecryptError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const username = localStorage.getItem('username');
 
@@ -96,12 +98,17 @@ function PasswordEncryptor() {
 
           <label>
             Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="password-input-container">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
           </label>
 
           <label>

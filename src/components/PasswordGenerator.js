@@ -189,6 +189,15 @@ function PasswordGenerator() {
               ))}
             </ul>
           )}
+           {/* Button to go to Encrypt/Decrypt */}
+            <div className="encrypt-nav-button-container">
+              <button
+                className="small-nav-button"
+                onClick={() => window.location.href = '/encrypt'}
+              >
+                Go to Encrypt/Decrypt
+              </button>
+            </div>
         </div>
       </div>
     </div>

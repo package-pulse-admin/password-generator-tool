@@ -6,13 +6,33 @@ function PasswordEncryptor() {
   const [encryptionType, setEncryptionType] = useState('bcrypt');
   const [encryptedPassword, setEncryptedPassword] = useState('');
   const [error, setError] = useState(null);
+  const [generatedPassword, setGeneratedPassword] = useState('');
+  const [decryptType, setDecryptType] = useState('AES');
+  const [encryptedInput, setEncryptedInput] = useState('');
+  const [decryptedOutput, setDecryptedOutput] = useState('');
+  const [decryptError, setDecryptError] = useState(null);
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-  };
+  const username = localStorage.getItem('username');
 
-  const handleEncryptionTypeChange = (e) => {
-    setEncryptionType(e.target.value);
+  const savePassword = async () => {
+    try {
+      const response = await fetch(`http://localhost:8085/library/${username}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ value: encryptedPassword })
+      });
+
+      if (response.ok) {
+        alert('Password saved!');
+      } else {
+        const msg = await response.text();
+        alert(`Error saving password: ${msg}`);
+      }
+    } catch (error) {
+      console.error('Error saving password:', error);
+    }
   };
 
   const handleEncrypt = async (e) => {
@@ -24,28 +44,53 @@ function PasswordEncryptor() {
       const endpoint = `http://localhost:8081/api/v1/encrypt/${encryptionType}`;
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
       });
 
-      if (response.ok) {
-        const result = await response.text();
-        setEncryptedPassword(result);
-      } else {
-        const errorMsg = await response.text();
-        setError(`Error: ${errorMsg}`);
-      }
+      const result = await response.text();
+      response.ok ? setEncryptedPassword(result) : setError(`Error: ${result}`);
     } catch (err) {
-      console.error('Encryption error:', err);
       setError('Unexpected error during encryption.');
+    }
+  };
+
+  const handleDecrypt = async (e) => {
+    e.preventDefault();
+    setDecryptedOutput('');
+    setDecryptError(null);
+
+    try {
+      const endpoint = `http://localhost:8081/api/v1/decrypt/${decryptType}`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: encryptedInput })
+      });
+
+      const result = await response.text();
+      response.ok ? setDecryptedOutput(result) : setDecryptError(`Error: ${result}`);
+    } catch (err) {
+      setDecryptError('Unexpected error during decryption.');
     }
   };
 
   return (
     <div className="encryptor-wrapper">
+      <div className="logout-container">
+        <button
+          className="logout-button"
+          onClick={() => {
+            localStorage.removeItem('username');
+            window.location.href = '/';
+          }}
+        >
+          Logout
+        </button>
+      </div>
+
       <div className="forms-container">
+        {/* Encrypt Form */}
         <form className="encryptor-form" onSubmit={handleEncrypt}>
           <h2>Password Encryptor</h2>
 
@@ -54,30 +99,74 @@ function PasswordEncryptor() {
             <input
               type="password"
               value={password}
-              onChange={handlePasswordChange}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </label>
 
           <label>
             Encryption Type:
-            <select value={encryptionType} onChange={handleEncryptionTypeChange}>
+            <select value={encryptionType} onChange={(e) => setEncryptionType(e.target.value)}>
               <option value="bcrypt">bcrypt</option>
-              <option value="sha256">sha256</option>
-              <option value="md5">md5</option>
+              <option value="AES">AES</option>
+              <option value="RSA">RSA</option>
             </select>
           </label>
 
           <button type="submit">Encrypt</button>
 
           {error && <div className="error-message">{error}</div>}
-
           {encryptedPassword && (
             <div className="generated-password">
               <strong>Encrypted Password:</strong>
               <span>{encryptedPassword}</span>
+              <button onClick={savePassword}>Save</button>
+              <button onClick={() => window.location.href = '/generate'}>Password Library</button>
             </div>
           )}
+        </form>
+
+        {/* Decrypt Form */}
+        <form className="encryptor-form" onSubmit={handleDecrypt}>
+          <h2>Password Decryptor</h2>
+
+          <label>
+            Encrypted Value:
+            <input
+              type="text"
+              value={encryptedInput}
+              onChange={(e) => setEncryptedInput(e.target.value)}
+              required
+            />
+          </label>
+
+          <label>
+            Encryption Type:
+            <select value={decryptType} onChange={(e) => setDecryptType(e.target.value)}>
+              <option value="AES">AES</option>
+              <option value="RSA">RSA</option>
+            </select>
+          </label>
+
+          <button type="submit">Decrypt</button>
+
+          {decryptError && <div className="error-message">{decryptError}</div>}
+          {decryptedOutput && (
+            <div className="generated-password">
+              <strong>Decrypted Password:</strong>
+              <span>{decryptedOutput}</span>
+            </div>
+          )}
+
+          {/* Password Library Button INSIDE the Decrypt Form */}
+          <div className="encrypt-nav-button-container">
+            <button
+              className="small-nav-button"
+              onClick={() => window.location.href = '/generate'}
+            >
+              Password Library
+            </button>
+          </div>
         </form>
       </div>
     </div>

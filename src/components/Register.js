@@ -43,7 +43,7 @@ function Register() {
         <h2>Register</h2>
         <input
           name="username"
-          placeholder="Email"
+          placeholder="Username"
           value={form.username}
           onChange={handleChange}
           required
@@ -58,7 +58,7 @@ function Register() {
         />
         <input
           name="fullName"
-          placeholder="Full Name"
+          placeholder="Email"
           value={form.fullName}
           onChange={handleChange}
         />

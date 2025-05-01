@@ -30,7 +30,7 @@ function PasswordGenerator() {
     });
 
     try {
-      const response = await fetch(`http://localhost:8081/api/v1/password/generate?${params.toString()}`, {
+      const response = await fetch(`http://localhost:8089/api/v1/password/generate?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -51,7 +51,7 @@ function PasswordGenerator() {
 
   const fetchSavedPasswords = async () => {
     try {
-      const response = await fetch(`http://localhost:8085/library/${username}`, {
+      const response = await fetch(`http://localhost:8089/library/${username}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -74,7 +74,7 @@ function PasswordGenerator() {
     if (!generatedPassword) return;
 
     try {
-      const response = await fetch(`http://localhost:8085/library/${username}`, {
+      const response = await fetch(`http://localhost:8089/library/${username}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -97,7 +97,7 @@ function PasswordGenerator() {
 
   const deletePassword = async (passId) => {
     try {
-      const response = await fetch(`http://localhost:8085/library/${username}?passId=${passId}`, {
+      const response = await fetch(`http://localhost:8089/library/${username}?passId=${passId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -119,7 +119,7 @@ function PasswordGenerator() {
 
   const checkPassword = async (password) => {
     try {
-      const response = await fetch(`http://localhost:8081/api/v1/password/check?password=${password}`, {
+      const response = await fetch(`http://localhost:8089/api/v1/password/check?password=${password}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

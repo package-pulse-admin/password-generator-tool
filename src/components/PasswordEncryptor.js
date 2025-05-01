@@ -26,7 +26,7 @@ function PasswordEncryptor() {
 
   const savePassword = async () => {
     try {
-      const response = await fetch(`http://localhost:8085/library/${username}`, {
+      const response = await fetch(`http://localhost:8089/library/${username}`, {
         method: 'POST',
         headers: {
                   'Authorization': `Bearer ${token}`,
@@ -52,7 +52,7 @@ function PasswordEncryptor() {
     setError(null);
 
     try {
-      const endpoint = `http://localhost:8081/api/v1/encrypt/${encryptionType}`;
+      const endpoint = `http://localhost:8089/api/v1/encrypt/${encryptionType}`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -75,7 +75,7 @@ function PasswordEncryptor() {
     setDecryptError(null);
 
     try {
-      const endpoint = `http://localhost:8081/api/v1/decrypt/${decryptType}`;
+      const endpoint = `http://localhost:8089/api/v1/decrypt/${decryptType}`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {

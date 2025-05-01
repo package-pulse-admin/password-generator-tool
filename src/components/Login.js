@@ -18,9 +18,12 @@ function Login() {
     });
 
     if (res.ok) {
-      localStorage.setItem('username', username); // Save username
-      navigate('/generate');
-    } else {
+          const data = await res.json();
+          const token = data.token;
+          localStorage.setItem('jwtToken', token);
+          localStorage.setItem('username', username);
+          navigate('/generate');
+        } else {
       setShowError(true);
     }
   };

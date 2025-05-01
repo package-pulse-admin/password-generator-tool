@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './PasswordEncryptor.css';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 function PasswordEncryptor() {
   const [password, setPassword] = useState('');
@@ -13,16 +14,24 @@ function PasswordEncryptor() {
   const [decryptedOutput, setDecryptedOutput] = useState('');
   const [decryptError, setDecryptError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const username = localStorage.getItem('username');
+  const token = localStorage.getItem('jwtToken');
+
+    if (!token) {
+       console.error('No token found, please log in again.');
+       navigate('/');
+     }
 
   const savePassword = async () => {
     try {
       const response = await fetch(`http://localhost:8085/library/${username}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
-        },
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
         body: JSON.stringify({ value: encryptedPassword })
       });
 
@@ -46,7 +55,10 @@ function PasswordEncryptor() {
       const endpoint = `http://localhost:8081/api/v1/encrypt/${encryptionType}`;
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+                                 },
         body: JSON.stringify({ password })
       });
 
@@ -66,7 +78,10 @@ function PasswordEncryptor() {
       const endpoint = `http://localhost:8081/api/v1/decrypt/${decryptType}`;
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+                           'Authorization': `Bearer ${token}`,
+                           'Content-Type': 'application/json',
+                                                  },
         body: JSON.stringify({ password: encryptedInput })
       });
 

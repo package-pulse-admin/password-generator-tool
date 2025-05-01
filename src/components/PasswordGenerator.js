@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PasswordGenerator.css';
+import { useNavigate } from 'react-router-dom';
 
 function PasswordGenerator() {
   const [length, setLength] = useState(12);
@@ -9,8 +10,15 @@ function PasswordGenerator() {
   const [useSymbols, setUseSymbols] = useState(true);
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [passwordList, setPasswordList] = useState([]);
+  const navigate = useNavigate();
+  const username = localStorage.getItem('username');
+  const token = localStorage.getItem('jwtToken');
 
-  const username = localStorage.getItem('username'); // Get saved username
+
+  if (!token) {
+    console.error('No token found, please log in again.');
+    navigate('/');
+  }
 
   const generatePassword = async () => {
     const params = new URLSearchParams({
@@ -22,7 +30,18 @@ function PasswordGenerator() {
     });
 
     try {
-      const response = await fetch(`http://localhost:8081/api/v1/password/generate?${params.toString()}`);
+      const response = await fetch(`http://localhost:8081/api/v1/password/generate?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate password');
+      }
+
       const password = await response.text();
       setGeneratedPassword(password);
     } catch (error) {
@@ -32,9 +51,20 @@ function PasswordGenerator() {
 
   const fetchSavedPasswords = async () => {
     try {
-      const res = await fetch(`http://localhost:8085/library/${username}`); // Dynamic username
-      const data = await res.json();
-      setPasswordList(data);
+      const response = await fetch(`http://localhost:8085/library/${username}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPasswordList(data);
+      } else {
+        console.error('Failed to fetch saved passwords');
+      }
     } catch (error) {
       console.error('Error fetching saved passwords:', error);
     }
@@ -47,9 +77,10 @@ function PasswordGenerator() {
       const response = await fetch(`http://localhost:8085/library/${username}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ value: generatedPassword })
+        body: JSON.stringify({ value: generatedPassword }),
       });
 
       if (response.ok) {
@@ -64,11 +95,14 @@ function PasswordGenerator() {
     }
   };
 
-
   const deletePassword = async (passId) => {
     try {
       const response = await fetch(`http://localhost:8085/library/${username}?passId=${passId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.ok) {
@@ -84,26 +118,32 @@ function PasswordGenerator() {
   };
 
   const checkPassword = async (password) => {
-     try {
-       const response = await fetch(`http://localhost:8081/api/v1/password/check?password=${password}`, {
-         method: 'POST',
-       });
+    try {
+      const response = await fetch(`http://localhost:8081/api/v1/password/check?password=${password}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-       if (response.ok) {
-         const msg = await response.text();
-         alert(`Strength of password ${password} is: ${msg}`);
-       } else {
-         const msg = await response.text();
-         alert(`Error deleting password: ${msg}`);
-       }
-     } catch (error) {
-       console.error('Error deleting password:', error);
-     }
-   };
+      if (response.ok) {
+        const msg = await response.text();
+        alert(`Strength of password ${password} is: ${msg}`);
+      } else {
+        const msg = await response.text();
+        alert(`Error checking password: ${msg}`);
+      }
+    } catch (error) {
+      console.error('Error checking password:', error);
+    }
+  };
 
   useEffect(() => {
-    fetchSavedPasswords();
-  }, []);
+    if (token) {
+      fetchSavedPasswords();
+    }
+  }, [token]);
 
   return (
     <div className="generator-wrapper">
@@ -111,7 +151,8 @@ function PasswordGenerator() {
         <button
           className="logout-button"
           onClick={() => {
-            localStorage.removeItem('username'); // Clear on logout
+            localStorage.removeItem('username');
+            localStorage.removeItem('jwtToken');
             window.location.href = '/';
           }}
         >
@@ -191,15 +232,15 @@ function PasswordGenerator() {
               ))}
             </ul>
           )}
-           {/* Button to go to Encrypt/Decrypt */}
-            <div className="encrypt-nav-button-container">
-              <button
-                className="small-nav-button"
-                onClick={() => window.location.href = '/encrypt'}
-              >
-                Go to Encrypt/Decrypt
-              </button>
-            </div>
+          {/* Button to go to Encrypt/Decrypt */}
+          <div className="encrypt-nav-button-container">
+            <button
+              className="small-nav-button"
+              onClick={() => window.location.href = '/encrypt'}
+            >
+              Go to Encrypt/Decrypt
+            </button>
+          </div>
         </div>
       </div>
     </div>

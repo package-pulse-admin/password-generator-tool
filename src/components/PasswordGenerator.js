@@ -204,7 +204,7 @@ function PasswordGenerator() {
 
         {/* Password Library Display */}
         <div className="password-library">
-          <h2>Saved Passwords</h2>
+          <h2>Vault</h2>
           {passwordList.length === 0 ? (
             <p>No passwords saved yet.</p>
           ) : (
@@ -212,7 +212,7 @@ function PasswordGenerator() {
               {passwordList.map((item, idx) => (
                 <li key={idx} className="password-item">
                   <div className="password-text">
-                    <strong>Password:</strong> {item.password_value}
+                    <strong>Password:</strong> {item.passwordValue}
                   </div>
                   <div className="password-actions">
                     <button

@@ -22,7 +22,7 @@ function Login() {
           const token = data.token;
           localStorage.setItem('jwtToken', token);
           localStorage.setItem('username', username);
-          navigate('/generate');
+          navigate('/vault');
         } else {
       setShowError(true);
     }

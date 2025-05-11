@@ -4,6 +4,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import PasswordGenerator from './components/PasswordGenerator';
 import PasswordEncryptor from './components/PasswordEncryptor';
+import VaultPage from './components/VaultPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/generate" element={<PasswordGenerator />} />
         <Route path="/encrypt" element={<PasswordEncryptor />} />
+        <Route path="/vault" element={<VaultPage />} />
       </Routes>
     </Router>
   );

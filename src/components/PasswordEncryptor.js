@@ -8,7 +8,6 @@ function PasswordEncryptor() {
   const [encryptionType, setEncryptionType] = useState('bcrypt');
   const [encryptedPassword, setEncryptedPassword] = useState('');
   const [error, setError] = useState(null);
-  const [generatedPassword, setGeneratedPassword] = useState('');
   const [decryptType, setDecryptType] = useState('AES');
   const [encryptedInput, setEncryptedInput] = useState('');
   const [decryptedOutput, setDecryptedOutput] = useState('');
@@ -19,19 +18,19 @@ function PasswordEncryptor() {
   const username = localStorage.getItem('username');
   const token = localStorage.getItem('jwtToken');
 
-    if (!token) {
-       console.error('No token found, please log in again.');
-       navigate('/');
-     }
+  if (!token) {
+    console.error('No token found, please log in again.');
+    navigate('/');
+  }
 
   const savePassword = async () => {
     try {
       const response = await fetch(`http://localhost:8089/library/${username}`, {
         method: 'POST',
         headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ value: encryptedPassword })
       });
 
@@ -58,7 +57,7 @@ function PasswordEncryptor() {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-                                 },
+        },
         body: JSON.stringify({ password })
       });
 
@@ -79,9 +78,9 @@ function PasswordEncryptor() {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-                           'Authorization': `Bearer ${token}`,
-                           'Content-Type': 'application/json',
-                                                  },
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ password: encryptedInput })
       });
 
@@ -93,104 +92,97 @@ function PasswordEncryptor() {
   };
 
   return (
-    <div className="encryptor-wrapper">
-      <div className="logout-container">
-        <button
-          className="logout-button"
-          onClick={() => {
-            localStorage.removeItem('username');
-            window.location.href = '/';
-          }}
-        >
-          Logout
-        </button>
-      </div>
+    <div className="vault-wrapper">
+      {/* Side Menu */}
+      <aside className="side-menu">
+        <button onClick={() => navigate('/generate')}>Generate Pass</button>
+        <button onClick={() => navigate('/vault')}>Pass History</button>
+        <button onClick={() => navigate('/encrypt')}>Encrypt/Decrypt</button>
+        <button onClick={() => {
+          localStorage.clear();
+          navigate('/');
+        }}>Logout</button>
+      </aside>
 
-      <div className="forms-container">
-        {/* Encrypt Form */}
-        <form className="encryptor-form" onSubmit={handleEncrypt}>
-          <h2>Password Encryptor</h2>
+      {/* Forms Section */}
+      <main className="vault-content">
+        <div className="forms-container">
+          {/* Encrypt Form */}
+          <form className="encryptor-form" onSubmit={handleEncrypt}>
+            <h2>Password Encryptor</h2>
+            <label>
+              Password:
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </span>
+              </div>
+            </label>
 
-          <label>
-            Password:
-            <div className="password-input-container">
+            <label>
+              Encryption Type:
+              <select value={encryptionType} onChange={(e) => setEncryptionType(e.target.value)}>
+                <option value="bcrypt">bcrypt</option>
+                <option value="AES">AES</option>
+                <option value="RSA">RSA</option>
+              </select>
+            </label>
+
+            <button type="submit">Encrypt</button>
+
+            {error && <div className="error-message">{error}</div>}
+            {encryptedPassword && (
+              <div className="generated-password">
+                <strong>Encrypted Password:</strong>
+                <div className="encrypted-text">{encryptedPassword}</div>
+                <div className="button-group">
+                  <button onClick={savePassword}>Save</button>
+                  <button onClick={() => window.location.href = '/vault'}>Password Library</button>
+                </div>
+              </div>
+            )}
+          </form>
+
+          {/* Decrypt Form */}
+          <form className="encryptor-form" onSubmit={handleDecrypt}>
+            <h2>Password Decryptor</h2>
+
+            <label>
+              Encrypted Value:
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="text"
+                value={encryptedInput}
+                onChange={(e) => setEncryptedInput(e.target.value)}
                 required
               />
-              <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <FiEyeOff /> : <FiEye />}
-              </span>
-            </div>
-          </label>
+            </label>
 
-          <label>
-            Encryption Type:
-            <select value={encryptionType} onChange={(e) => setEncryptionType(e.target.value)}>
-              <option value="bcrypt">bcrypt</option>
-              <option value="AES">AES</option>
-              <option value="RSA">RSA</option>
-            </select>
-          </label>
+            <label>
+              Encryption Type:
+              <select value={decryptType} onChange={(e) => setDecryptType(e.target.value)}>
+                <option value="AES">AES</option>
+                <option value="RSA">RSA</option>
+              </select>
+            </label>
 
-          <button type="submit">Encrypt</button>
+            <button type="submit">Decrypt</button>
 
-          {error && <div className="error-message">{error}</div>}
-          {encryptedPassword && (
-            <div className="generated-password">
-              <strong>Encrypted Password:</strong>
-              <span>{encryptedPassword}</span>
-              <button onClick={savePassword}>Save</button>
-              <button onClick={() => window.location.href = '/generate'}>Password Library</button>
-            </div>
-          )}
-        </form>
-
-        {/* Decrypt Form */}
-        <form className="encryptor-form" onSubmit={handleDecrypt}>
-          <h2>Password Decryptor</h2>
-
-          <label>
-            Encrypted Value:
-            <input
-              type="text"
-              value={encryptedInput}
-              onChange={(e) => setEncryptedInput(e.target.value)}
-              required
-            />
-          </label>
-
-          <label>
-            Encryption Type:
-            <select value={decryptType} onChange={(e) => setDecryptType(e.target.value)}>
-              <option value="AES">AES</option>
-              <option value="RSA">RSA</option>
-            </select>
-          </label>
-
-          <button type="submit">Decrypt</button>
-
-          {decryptError && <div className="error-message">{decryptError}</div>}
-          {decryptedOutput && (
-            <div className="generated-password">
-              <strong>Decrypted Password:</strong>
-              <span>{decryptedOutput}</span>
-            </div>
-          )}
-
-          {/* Password Library Button INSIDE the Decrypt Form */}
-          <div className="encrypt-nav-button-container">
-            <button
-              className="small-nav-button"
-              onClick={() => window.location.href = '/generate'}
-            >
-              Password Library
-            </button>
-          </div>
-        </form>
-      </div>
+            {decryptError && <div className="error-message">{decryptError}</div>}
+            {decryptedOutput && (
+              <div className="generated-password">
+                <strong>Decrypted Password:</strong>
+                <span>{decryptedOutput}</span>
+              </div>
+            )}
+          </form>
+        </div>
+      </main>
     </div>
   );
 }

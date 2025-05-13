@@ -15,7 +15,8 @@ function PasswordGenerator() {
   const token = localStorage.getItem('jwtToken');
   const [editFormVisible, setEditFormVisible] = useState(false);
   const [editData, setEditData] = useState({ id: null, value: '', appName: '', passwordLabel: '' });
-
+  const [newPasswordData, setNewPasswordData] = useState({ appName: '', passwordLabel: '', value: '' });
+  const [saveFormVisible, setSaveFormVisible] = useState(false);
 
 
   if (!token) {
@@ -73,9 +74,19 @@ function PasswordGenerator() {
     }
   };
 
-  const savePassword = async () => {
+  const savePassword = () => {
     if (!generatedPassword) return;
 
+    setNewPasswordData({
+      appName: '',
+      passwordLabel: '',
+      value: generatedPassword
+    });
+
+    setSaveFormVisible(true);
+  };
+
+  const submitSave = async () => {
     try {
       const response = await fetch(`http://localhost:8089/library/${username}`, {
         method: 'POST',
@@ -83,12 +94,13 @@ function PasswordGenerator() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ value: generatedPassword }),
+        body: JSON.stringify(newPasswordData),
       });
 
       if (response.ok) {
-        alert('Password saved!');
+        setSaveFormVisible(false);
         fetchSavedPasswords();
+        alert('Password saved!');
       } else {
         const msg = await response.text();
         alert(`Error saving password: ${msg}`);
@@ -97,6 +109,7 @@ function PasswordGenerator() {
       console.error('Error saving password:', error);
     }
   };
+
 
   const deletePassword = async (passId) => {
     try {
@@ -309,7 +322,35 @@ function PasswordGenerator() {
               </div>
             </div>
           )}
-
+        {saveFormVisible && (
+  <div className="modal-overlay" onClick={() => setSaveFormVisible(false)}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <h3>Save Generated Password</h3>
+      <label>App Name:</label>
+      <input
+        type="text"
+        value={newPasswordData.appName}
+        onChange={(e) => setNewPasswordData({ ...newPasswordData, appName: e.target.value })}
+      />
+      <label>Password Label:</label>
+      <input
+        type="text"
+        value={newPasswordData.passwordLabel}
+        onChange={(e) => setNewPasswordData({ ...newPasswordData, passwordLabel: e.target.value })}
+      />
+      <label>Password Value:</label>
+      <input
+        type="text"
+        onChange={(e) => setNewPasswordData({ ...newPasswordData, value: e.target.value })}
+        placeholder={newPasswordData.value}
+      />
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+        <button onClick={submitSave} className="delete-button">Save</button>
+        <button onClick={() => setSaveFormVisible(false)} className="delete-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
 
           {/* Button to go to Encrypt/Decrypt */}
           <div className="encrypt-nav-button-container">

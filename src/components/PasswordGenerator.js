@@ -281,32 +281,35 @@ function PasswordGenerator() {
             </ul>
           )}
           {editFormVisible && (
-            <div className="edit-form">
-              <h3>Edit Password</h3>
-              <label>App Name:</label>
-              <input
-                type="text"
-                value={editData.appName}
-                onChange={(e) => setEditData({ ...editData, appName: e.target.value })}
-              />
-              <label>Password Label:</label>
-              <input
-                type="text"
-                value={editData.passwordLabel}
-                onChange={(e) => setEditData({ ...editData, passwordLabel: e.target.value })}
-              />
-              <label>Password Value:</label>
-              <input
-                type="text"
-                value={editData.value}
-                onChange={(e) => setEditData({ ...editData, value: e.target.value })}
-              />
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                <button onClick={submitEdit} className="delete-button">Save Changes</button>
-                <button onClick={() => setEditFormVisible(false)} className="delete-button">Cancel</button>
+            <div className="modal-overlay" onClick={() => setEditFormVisible(false)}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h3>Edit Password</h3>
+                <label>App Name:</label>
+                <input
+                  type="text"
+                  value={editData.appName}
+                  onChange={(e) => setEditData({ ...editData, appName: e.target.value })}
+                />
+                <label>Password Label:</label>
+                <input
+                  type="text"
+                  value={editData.passwordLabel}
+                  onChange={(e) => setEditData({ ...editData, passwordLabel: e.target.value })}
+                />
+                <label>Password Value:</label>
+                <input
+                  type="text"
+                  value={editData.value}
+                  onChange={(e) => setEditData({ ...editData, value: e.target.value })}
+                />
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                  <button onClick={submitEdit} className="delete-button">Save Changes</button>
+                  <button onClick={() => setEditFormVisible(false)} className="delete-button">Cancel</button>
+                </div>
               </div>
             </div>
           )}
+
 
           {/* Button to go to Encrypt/Decrypt */}
           <div className="encrypt-nav-button-container">

@@ -146,7 +146,7 @@ function PasswordGenerator() {
     console.log('Editing item:', item);
     setEditData({
       id: item.id,
-      value: item.value,
+      value: item.passwordValue,
       appName: item.appName,
       passwordLabel: item.passwordLabel
     });
@@ -287,20 +287,20 @@ function PasswordGenerator() {
                 <label>App Name:</label>
                 <input
                   type="text"
-                  value={editData.appName}
                   onChange={(e) => setEditData({ ...editData, appName: e.target.value })}
+                  placeholder={editData.appName}
                 />
                 <label>Password Label:</label>
                 <input
                   type="text"
-                  value={editData.passwordLabel}
                   onChange={(e) => setEditData({ ...editData, passwordLabel: e.target.value })}
+                  placeholder={editData.passwordLabel}
                 />
                 <label>Password Value:</label>
                 <input
                   type="text"
-                  value={editData.value}
                   onChange={(e) => setEditData({ ...editData, value: e.target.value })}
+                  placeholder={editData.value}
                 />
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                   <button onClick={submitEdit} className="delete-button">Save Changes</button>

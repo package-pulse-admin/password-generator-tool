@@ -78,6 +78,9 @@ function PasswordHistory() {
           <button className="small-nav-button" onClick={() => navigate('/generate')}>
             Back to Generator
           </button>
+          <button className="small-nav-button" onClick={() => navigate('/encrypt')}>
+                              Go to Encrypt/Decrypt
+                            </button>
         </div>
       </div>
     </div>

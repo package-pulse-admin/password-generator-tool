@@ -13,6 +13,9 @@ function PasswordGenerator() {
   const navigate = useNavigate();
   const username = localStorage.getItem('username');
   const token = localStorage.getItem('jwtToken');
+  const [editFormVisible, setEditFormVisible] = useState(false);
+  const [editData, setEditData] = useState({ id: null, value: '', appName: '', passwordLabel: '' });
+
 
 
   if (!token) {
@@ -139,6 +142,48 @@ function PasswordGenerator() {
     }
   };
 
+  const handleEditClick = (item) => {
+    console.log('Editing item:', item);
+    setEditData({
+      id: item.id,
+      value: item.value,
+      appName: item.appName,
+      passwordLabel: item.passwordLabel
+    });
+    setEditFormVisible(true);
+  };
+
+  const submitEdit = async () => {
+    const existing = passwordList.find(p => p.id === editData.id);
+    const body = {
+      value: editData.value || existing.value,
+      appName: editData.appName || existing.appName,
+      passwordLabel: editData.passwordLabel || existing.passwordLabel
+    };
+
+    try {
+      const response = await fetch(`http://localhost:8089/library/${username}?passId=${editData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (response.ok) {
+        alert('Password updated!');
+        setEditFormVisible(false);
+        fetchSavedPasswords();
+      } else {
+        const msg = await response.text();
+        alert(`Update failed: ${msg}`);
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchSavedPasswords();
@@ -211,9 +256,11 @@ function PasswordGenerator() {
             <ul>
               {passwordList.map((item, idx) => (
                 <li key={idx} className="password-item">
-                  <div className="password-text">
-                    <strong>Password:</strong> {item.passwordValue}
-                  </div>
+                 <div className="password-text">
+                       <div><strong>App:</strong> {item.appName}</div>
+                       <div><strong>Label:</strong> {item.passwordLabel}</div>
+                       <div style={{ wordBreak: 'break-word' }}><strong>Pass:</strong> {item.passwordValue}</div>
+                     </div>
                   <div className="password-actions">
                     <button
                       className="delete-button"
@@ -223,22 +270,51 @@ function PasswordGenerator() {
                     </button>
                     <button
                       className="delete-button"
-                      onClick={() => checkPassword(item.password_value)}
+                      onClick={() => checkPassword(item.value)}
                     >
                       Check
                     </button>
+                    <button className="delete-button" onClick={() => handleEditClick(item)}>Edit</button>
                   </div>
                 </li>
               ))}
             </ul>
           )}
+          {editFormVisible && (
+            <div className="edit-form">
+              <h3>Edit Password</h3>
+              <label>App Name:</label>
+              <input
+                type="text"
+                value={editData.appName}
+                onChange={(e) => setEditData({ ...editData, appName: e.target.value })}
+              />
+              <label>Password Label:</label>
+              <input
+                type="text"
+                value={editData.passwordLabel}
+                onChange={(e) => setEditData({ ...editData, passwordLabel: e.target.value })}
+              />
+              <label>Password Value:</label>
+              <input
+                type="text"
+                value={editData.value}
+                onChange={(e) => setEditData({ ...editData, value: e.target.value })}
+              />
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button onClick={submitEdit} className="delete-button">Save Changes</button>
+                <button onClick={() => setEditFormVisible(false)} className="delete-button">Cancel</button>
+              </div>
+            </div>
+          )}
+
           {/* Button to go to Encrypt/Decrypt */}
           <div className="encrypt-nav-button-container">
-            <button
-              className="small-nav-button"
-              onClick={() => window.location.href = '/encrypt'}
-            >
+            <button className="small-nav-button" onClick={() => window.location.href = '/encrypt'}>
               Go to Encrypt/Decrypt
+            </button>
+            <button className="small-nav-button" onClick={() => window.location.href = '/history'}>
+              Go to History
             </button>
           </div>
         </div>

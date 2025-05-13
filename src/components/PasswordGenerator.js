@@ -270,7 +270,7 @@ function PasswordGenerator() {
                     </button>
                     <button
                       className="delete-button"
-                      onClick={() => checkPassword(item.value)}
+                      onClick={() => checkPassword(item.passwordValue)}
                     >
                       Check
                     </button>

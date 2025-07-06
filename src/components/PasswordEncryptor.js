@@ -14,37 +14,21 @@ function PasswordEncryptor() {
   const [decryptedOutput, setDecryptedOutput] = useState('');
   const [decryptError, setDecryptError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+  const [isSaveFormVisible, setIsSaveFormVisible] = useState(false);
+  const [newPasswordData, setNewPasswordData] = useState({
+    appName: '',
+    passwordLabel: '',
+    value: ''
+  });
 
+  const navigate = useNavigate();
   const username = localStorage.getItem('username');
   const token = localStorage.getItem('jwtToken');
 
-    if (!token) {
-       console.error('No token found, please log in again.');
-       navigate('/');
-     }
-
-  const savePassword = async () => {
-    try {
-      const response = await fetch(`http://localhost:8089/library/${username}`, {
-        method: 'POST',
-        headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-        body: JSON.stringify({ value: encryptedPassword })
-      });
-
-      if (response.ok) {
-        alert('Password saved!');
-      } else {
-        const msg = await response.text();
-        alert(`Error saving password: ${msg}`);
-      }
-    } catch (error) {
-      console.error('Error saving password:', error);
-    }
-  };
+  if (!token) {
+    console.error('No token found, please log in again.');
+    navigate('/');
+  }
 
   const handleEncrypt = async (e) => {
     e.preventDefault();
@@ -58,7 +42,7 @@ function PasswordEncryptor() {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-                                 },
+        },
         body: JSON.stringify({ password })
       });
 
@@ -79,9 +63,9 @@ function PasswordEncryptor() {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-                           'Authorization': `Bearer ${token}`,
-                           'Content-Type': 'application/json',
-                                                  },
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ password: encryptedInput })
       });
 
@@ -89,6 +73,29 @@ function PasswordEncryptor() {
       response.ok ? setDecryptedOutput(result) : setDecryptError(`Error: ${result}`);
     } catch (err) {
       setDecryptError('Unexpected error during decryption.');
+    }
+  };
+
+  const handleSubmitSaveForm = async () => {
+    try {
+      const response = await fetch(`http://localhost:8089/library/${username}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newPasswordData),
+      });
+
+      if (response.ok) {
+        alert('Password saved!');
+        setIsSaveFormVisible(false);
+      } else {
+        const msg = await response.text();
+        alert(`Error saving password: ${msg}`);
+      }
+    } catch (error) {
+      console.error('Error saving password:', error);
     }
   };
 
@@ -142,8 +149,81 @@ function PasswordEncryptor() {
             <div className="generated-password">
               <strong>Encrypted Password:</strong>
               <span>{encryptedPassword}</span>
-              <button onClick={savePassword}>Save</button>
-              <button onClick={() => window.location.href = '/generate'}>Password Library</button>
+              <button
+                onClick={() => {
+                  setNewPasswordData({
+                    appName: '',
+                    passwordLabel: '',
+                    value: encryptedPassword
+                  });
+                  setIsSaveFormVisible(true);
+                }}
+              >
+                Save
+              </button>
+              <button onClick={() => window.location.href = '/generate'}>
+                Password Library
+              </button>
+
+              {isSaveFormVisible && (
+                <div
+                  className="modal-overlay"
+                  onClick={() => setIsSaveFormVisible(false)} // Close modal on overlay click
+                >
+                  <div
+                    className="modal-content"
+                    onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+                  >
+                    <h3>Save Encrypted Password</h3>
+                    <label>
+                      App Name:
+                      <input
+                        type="text"
+                        value={newPasswordData.appName}
+                        onChange={(e) =>
+                          setNewPasswordData({ ...newPasswordData, appName: e.target.value })
+                        }
+                        placeholder="App name"
+                      />
+                    </label>
+
+                    <label>
+                      Label:
+                      <input
+                        type="text"
+                        value={newPasswordData.passwordLabel}
+                        onChange={(e) =>
+                          setNewPasswordData({ ...newPasswordData, passwordLabel: e.target.value })
+                        }
+                        placeholder="Label"
+                      />
+                    </label>
+
+                    <label>
+                      Password Value:
+                      <input type="text" value={newPasswordData.value} readOnly />
+                    </label>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                      <button
+                        type="button"
+                        onClick={handleSubmitSaveForm}
+                        className="save-button"
+                      >
+                        Submit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsSaveFormVisible(false)}
+                        className="save-button"
+                        style={{ backgroundColor: '#ccc', color: '#333' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </form>
@@ -180,7 +260,6 @@ function PasswordEncryptor() {
             </div>
           )}
 
-          {/* Password Library Button INSIDE the Decrypt Form */}
           <div className="encrypt-nav-button-container">
             <button
               className="small-nav-button"
